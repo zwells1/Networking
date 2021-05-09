@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+SET_AND_CHECK(net_INCLUDE_DIR @PACKAGE_net_DIRNAME_include@)
+
+IF (NOT TARGET net)
+  INCLUDE(${CMAKE_CURRENT_LIST_DIR}/netExports.cmakke)
+ENDIF()
+
+SET(net_INCLUDE_DIRS ${net_INCLUDE_DIR})
+
+SET(
+  net_LIBRARIES
+  NetZmq
+  )
