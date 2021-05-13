@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Socket.hpp"
+
 #include <thread>
 
 namespace net
@@ -30,7 +32,7 @@ namespace net
 
       void ClearSubscriptions();
 
-      boost::signals::signal<
+      boost::signals2::signal<
         void(const std::string& MessageType, const std::string& MessageData)> mSignalMessage;
 
     private:

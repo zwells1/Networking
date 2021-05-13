@@ -1,5 +1,5 @@
 #include <Zmq/SubSocket.hpp>
-
+#include <zmq.hpp>
 #include <iostream>
 #include <stdexcept>
 
@@ -24,7 +24,7 @@ void TestMessage(const std::string& MessageType, const std::string& MessageData)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void SetupSubscribeSocket(CSubSocket& SubscribeSocket)
+void SetupSubscribeSocket(net::CSubSocket& SubscribeSocket)
 {
   SubscribeSocket.mSignalMessage.connect(
     [&](const std::string& MessageType, const std::string& MessageData)
@@ -40,11 +40,14 @@ void SetupSubscribeSocket(CSubSocket& SubscribeSocket)
       std::cout << ErrorMessage << std::endl;
     });
 
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  SubscribeSocket.SubscribeToEverything();
+
   try
   {
-    SubscribeSocket.Connect("tcp://localhost:6999");
+    SubscribeSocket.Connect({"tcp://localhost:7999"});
 
-    std::cout << "Connecting to tcp://localhost:6999" << std::endl;
+    std::cout << "Connecting to tcp://localhost:7999" << std::endl;
   }
   catch (const zmq::error_t& Error)
   {
@@ -54,6 +57,8 @@ void SetupSubscribeSocket(CSubSocket& SubscribeSocket)
 
     std::exit(1);
   }
+
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 //-----------------------------------------------------------------------------
@@ -62,7 +67,7 @@ int main()
 {
   net::CSubSocket SubscribeSocket(1);
 
-  SetupSubscribeSocket(SetupSubscribeSocket);
+  SetupSubscribeSocket(SubscribeSocket);
 
   while(true)
   {

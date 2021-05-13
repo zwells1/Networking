@@ -40,7 +40,7 @@ namespace net
 
       //Subscriber parameters
       //TO-DO: might want to consider just a set not a multiset
-      std::multiset<std:string> mSubscriptions;
+      std::multiset<std::string> mSubscriptions;
 
       std::mutex mMutex;
   };

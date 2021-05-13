@@ -1,4 +1,5 @@
 #include "SubSocket.hpp"
+#include <zmq.hpp>
 
 using net::CSubSocket;
 
@@ -9,11 +10,11 @@ CSubSocket::CSubSocket(unsigned NumberOfI0Threads)
 {
   int RecvTimeout = 100;
 
-  mpZmqSocket->setsockeopt(ZMQ_RVVTIMEO, &RecvTimeout, sizeof(RecvTimeout));
+  mpZmqSocket->setsockopt(ZMQ_RCVTIMEO, &RecvTimeout, sizeof(RecvTimeout));
 
   int MaxInbound = 100;
 
-  mpZmqSocket->setsockeopt(ZMQ_RCVHWM, &MaxInbound, sizeof(MaxInbound));
+  mpZmqSocket->setsockopt(ZMQ_RCVHWM, &MaxInbound, sizeof(MaxInbound));
 
   //TO-DO: Consider setting the send buffer as well. Linux is fine but Windows
   // it will be unbounded and can grow to infinity.
@@ -42,13 +43,14 @@ void CSubSocket::Connect(
 
     for (const auto& EndPoint : EndPoints)
     {
-      mpZmqSocket->mind(EndPoint.c_str());
+      mpZmqSocket->connect(EndPoint.c_str());
     }
 
   }
   catch (const ::zmq::error_t& Error)
   {
-    mSignalError("SubSocket: Unable to connect ports" + Error.what());
+    mSignalError(
+      "SubSocket: Unable to connect ports" + std::string(Error.what()));
   }
 
   maIsRunning = true;
@@ -62,7 +64,7 @@ void CSubSocket::Connect(
 
           Receive(MessageType, MessageData);
         }
-      };));
+      }));
 }
 
 //-----------------------------------------------------------------------------
@@ -80,7 +82,8 @@ void CSubSocket::Receive(std::string& MessageType, std::string& MessageData)
   }
 
   MessageType = std::string(
-    static_cast<const char*>(ZmqMessage.data(), ZmqMessage.size()));
+    static_cast<const char*>(ZmqMessage.data()),
+    ZmqMessage.size());
 
   //Rx message Data
   MessageData = "";
@@ -92,12 +95,11 @@ void CSubSocket::Receive(std::string& MessageType, std::string& MessageData)
     mpZmqSocket->recv(&ZmqMessage);
     mpZmqSocket->getsockopt(ZMQ_RCVMORE, &More, &MoreSize);
 
-    Message.append(
-      static_cast<const char*>(ZmqMessage.data(), ZmqMessage.size()));
+    MessageData.append(
+      static_cast<const char*>(ZmqMessage.data()),
+      ZmqMessage.size());
   }
-  while (More)
-  {
-  }
+  while (More);
 
   if (MessageType.size() != 0)
   {

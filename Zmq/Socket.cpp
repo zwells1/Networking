@@ -1,4 +1,5 @@
 #include "Socket.hpp"
+#include <zmq.hpp>
 
 using net::CSocket;
 
@@ -6,7 +7,8 @@ using net::CSocket;
 //-----------------------------------------------------------------------------
 CSocket::CSocket(unsigned NumberOfI0Threads, int SocketType)
 : mpContext(new ::zmq::context_t (NumberOfI0Threads)),
-  mpZmqSocket(new ::zmq::socket_t (*mpContext, SocketType))
+  mpZmqSocket(new ::zmq::socket_t (*mpContext, SocketType)),
+  maIsConnected(false)
 {
 }
 

@@ -39,13 +39,13 @@ void CPubSocket::Connect(const std::initializer_list<const std::string>& EndPoin
 
     for (const auto& EndPoint : EndPoints)
     {
-      mpZmqSocket->mind(EndPoint.c_str());
+      mpZmqSocket->bind(EndPoint.c_str());
     }
 
   }
   catch (const ::zmq::error_t&)
   {
-    throw std::runtime_error("Publish Socket Connection")
+    throw std::runtime_error("Publish Socket Connection");
   }
 }
 
@@ -60,12 +60,12 @@ void CPubSocket::Send(
     //Prepare Message type
     ::zmq::message_t ZmqMessageType(MessageType.size());
 
-    memcopy(ZmqMessageType.data(), MessageType.data(), MessageType.size());
+    memcpy(ZmqMessageType.data(), MessageType.data(), MessageType.size());
 
     //Prepare Message Data
     ::zmq::message_t ZmqMessageData(MessageData.size());
 
-    memcopy(ZmqMessageData.data(), MessageData.data(), MessageData.size());
+    memcpy(ZmqMessageData.data(), MessageData.data(), MessageData.size());
 
     std::lock_guard<std::mutex> Lock(mMutex);
 
@@ -76,9 +76,9 @@ void CPubSocket::Send(
     }
 
     //Send Message Data
-    if (!mpZmqSocket->send(ZmqMessageData, ZMQ_SNDMORE))
+    if (!mpZmqSocket->send(ZmqMessageData))
     {
-      mSignalError("PubSocket: Failed to send Message: " + Message);
+      mSignalError("PubSocket: Failed to send Message: " + MessageData);
     }
   }
   catch (const ::zmq::error_t& Error)

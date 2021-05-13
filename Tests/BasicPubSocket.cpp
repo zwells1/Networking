@@ -1,12 +1,14 @@
 #include <Zmq/PubSocket.hpp>
+#include <zmq.hpp>
 #include <iostream>
+#include <thread>
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void SetupPublishSocket(net::CPubSocket& PublishSocket)
 {
   PublishSocket.mSignalError.connect(
-    [](const std::string& ErrorMesssage)
+    [](const std::string& ErrorMessage)
     {
       std::cout << ErrorMessage << std::endl;
 
@@ -14,7 +16,9 @@ void SetupPublishSocket(net::CPubSocket& PublishSocket)
 
   try
   {
-    PublishSocket.Connect("tcp://*6999");
+    PublishSocket.Connect({"tcp://*:7999"});
+
+    std::cout << "Pub: tcp://*:7999" << std::endl;
   }
   catch (const zmq::error_t& Error)
   {
@@ -32,7 +36,9 @@ int main()
 {
   net::CPubSocket PublishSocket(1);
 
-  SetupPublishSocket(PubSocket);
+  SetupPublishSocket(PublishSocket);
+
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 
   while(true)
   {
